@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ဆေးဆိုင် & ဆေးဂိုဒေါင် စီမံခန့်ခွဲမှု</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0d9488">
+<style>
+  :root{
+    --teal:#0d9488; --teal-dark:#0f766e; --amber:#d97706; --indigo:#4f46e5;
+    --indigo-dark:#4338ca; --green:#059669; --red:#dc2626; --slate:#475569;
+    --bg:#f8fafc; --card:#ffffff; --border:#e2e8f0; --muted:#94a3b8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);font-family:'Pyidaungsu','Noto Sans Myanmar',system-ui,-apple-system,sans-serif;color:#1e293b;}
+  #header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--teal-dark),var(--teal));color:#fff;padding:14px 16px 10px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  #header h1{font-size:15px;margin:0;font-weight:600;}
+  #header p{font-size:10.5px;margin:2px 0 0;opacity:.85;}
+  #tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:rgba(255,255,255,.15);border-radius:12px;padding:4px;margin-top:10px;}
+  .tabbtn{position:relative;background:none;border:none;color:rgba(255,255,255,.85);font-size:9.5px;padding:6px 2px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;}
+  .tabbtn span{white-space:nowrap;}
+  .tabbtn.active{background:#fff;color:var(--teal-dark);}
+  .tabbtn .dot{position:absolute;top:2px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--amber);}
+  #content{max-width:520px;margin:0 auto;padding:14px 14px 32px;}
+  #toast{display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:100;max-width:90%;text-align:center;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .card-title{font-size:13px;font-weight:600;color:#334155;margin-bottom:10px;}
+  .small-pad{padding:10px 12px;}
+  .section-label{font-size:11px;font-weight:600;color:#64748b;margin:14px 0 6px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px;}
+  .stat-card .bold{font-size:12.5px;font-weight:700;}
+  .stat-highlight-amber{background:#fffbeb;border-color:#fde68a;}
+  .stat-highlight-green{background:#ecfdf5;border-color:#a7f3d0;}
+  .mini-stat{border-radius:14px;padding:10px 12px;}
+  .amber-bg-soft{background:#fffbeb;border:1px solid #fde68a;}
+  .indigo-bg-soft{background:#eef2ff;border:1px solid #c7d2fe;}
+  .green-bg-soft{background:#ecfdf5;border:1px solid #a7f3d0;}
+  .amber-text{color:var(--amber);} .red-text{color:var(--red);} .indigo-text{color:var(--indigo);}
+  .teal-text{color:var(--teal-dark);} .emerald-text{color:var(--green);} .emerald-text-soft{color:#10b981;}
+  .alert-card{border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;}
+  .red-alert{background:#fef2f2;border:1px solid #fecaca;}
+  .indigo-alert{background:#eef2ff;border:1px solid #c7d2fe;}
+  .muted{color:var(--muted);} .small{font-size:11.5px;} .tiny{font-size:9px;font-weight:400;}
+  .bold{font-weight:700;} .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ta-r{text-align:right;} .ta-c{text-align:center;}
+  .row-between{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .row-left{display:flex;align-items:center;gap:8px;min-width:0;}
+  .row-right{text-align:right;flex-shrink:0;}
+  .row-gap{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .flex1{flex:1;} .min0{min-width:0;}
+  .lbl{font-size:11px;color:#64748b;display:block;margin:0 0 4px;}
+  .input{width:100%;border:1px solid var(--border);border-radius:12px;padding:9px 11px;font-size:13px;background:#f8fafc;color:#1e293b;font-family:inherit;margin-bottom:8px;}
+  select.input{appearance:auto;}
+  .btn{border:none;border-radius:12px;padding:11px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}
+  .btn.full{width:100%;}
+  .btn.small-btn{padding:8px;font-size:12px;margin-top:8px;}
+  .btn-outline{background:none;border:1px solid var(--border);color:#475569;}
+  .btn-outline-teal{background:none;border:1px solid var(--teal);color:var(--teal-dark);}
+  .btn-outline-indigo{background:none;border:1px solid var(--indigo);color:var(--indigo-dark);}
+  .badge-num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0;}
+  .highlight-box{background:#f0fdfa;border-radius:12px;padding:10px 12px;margin-bottom:10px;}
+  .indigo-bg{background:#eef2ff;}
+  .cart-row{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;}
+  .cart-row:last-of-type{border-bottom:none;}
+  .cart-total{width:64px;text-align:right;font-weight:600;flex-shrink:0;}
+  .qty-ctrl{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+  .qbtn{width:22px;height:22px;border-radius:50%;background:#f1f5f9;border:none;color:#64748b;cursor:pointer;font-size:13px;line-height:1;}
+  .del-btn{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:14px;margin-left:2px;}
+  .icon-btn{background:none;border:none;font-size:15px;cursor:pointer;padding:4px;}
+  .warn-text{color:var(--red);font-size:11px;margin-top:-4px;margin-bottom:6px;}
+  .table{width:100%;border-collapse:collapse;font-size:13px;}
+  .table th{text-align:left;font-size:10.5px;color:var(--muted);font-weight:500;padding-bottom:6px;}
+  .table td{padding:5px 0;border-top:1px solid #f8fafc;}
+  .table.small th, .table.small td{font-size:11.5px;}
+  .subtabs{display:flex;gap:6px;margin-bottom:12px;}
+  .subtab{flex:1;background:#fff;border:1px solid var(--border);border-radius:12px;padding:9px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;font-family:inherit;}
+  .subtab.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+  .hist-row{background:#fff;border:1px solid var(--border);border-radius:14px;padding:11px 13px;margin-bottom:8px;}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:150px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar-track{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;}
+  .bar-fill{width:70%;border-radius:6px 6px 0 0;min-height:2px;transition:height .3s;}
+  .bar-val{font-size:9px;color:#475569;margin-top:3px;}
+  .bar-label{font-size:9.5px;color:#94a3b8;margin-top:1px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:14px;z-index:200;}
+  .modal-box{background:#fff;border-radius:18px;padding:20px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;}
+  .footer-note{text-align:center;font-size:10.5px;color:var(--muted);margin-top:20px;line-height:1.6;padding:0 10px;}
+  .price-input{width:90px;flex-shrink:0;}
+  /* ---- visual polish ---- */
+  .card{transition:box-shadow .2s;box-shadow:0 2px 10px rgba(15,23,42,.05);}
+  .btn{transition:transform .08s;}
+  .btn:active{transform:scale(.96);}
+  .stat-card{position:relative;overflow:hidden;}
+  .stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal);}
+  .stat-highlight-amber::before{background:var(--amber);}
+  .stat-highlight-green::before{background:var(--green);}
+  .card-title{display:flex;align-items:center;gap:6px;}
+  /* ---- login ---- */
+  .login-screen{position:fixed;inset:0;z-index:300;background:linear-gradient(160deg,var(--teal-dark),var(--teal) 55%,#0a5c52);display:flex;align-items:center;justify-content:center;padding:20px;}
+  .login-card{background:#fff;border-radius:22px;padding:34px 26px;max-width:340px;width:100%;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.28);}
+  .login-icon{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;box-shadow:0 8px 20px rgba(13,148,136,.35);}
+  .login-card h2{margin:0 0 4px;font-size:17px;color:#1e293b;font-weight:700;}
+  .login-card p{margin:0 0 18px;}
+  .login-input{text-align:center;letter-spacing:6px;font-size:19px;font-weight:700;}
+  .header-logout{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:10.5px;padding:5px 11px;border-radius:20px;cursor:pointer;font-family:inherit;}
+  /* ---- tablet / desktop ---- */
+  @media (min-width:700px){
+    #content{max-width:760px;}
+    #header > div:first-of-type, #header h1, #header p{max-width:760px;margin-left:auto;margin-right:auto;}
+    #tabs{max-width:760px;margin:10px auto 0;grid-template-columns:repeat(5,minmax(0,140px));justify-content:center;}
+    .tabbtn{font-size:12px;padding:9px 4px;}
+    .grid-3{grid-template-columns:repeat(3,1fr);}
+    .card{padding:18px;}
+    .input,.btn{font-size:14px;}
+  }
+  @media (min-width:1000px){
+    #content{max-width:980px;}
+    #header > div:first-of-type, #header h1, #header p, #tabs{max-width:980px;}
+  }
+  @media print{
+    #header,#tabs,#toast,.btn,.footer-note{display:none !important;}
+    .modal-overlay{position:static;background:none;padding:0;}
+    .modal-box{box-shadow:none;max-height:none;}
+  }
+</style>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <h2>Admin Login</h2>
+      <p class="muted small">ဆေးဆိုင် POS System ကို ဝင်ရောက်ရန် Admin Username & Password ထည့်ပါ</p>
+      <input id="loginUser" type="text" class="input" placeholder="Username (Admin)" style="text-align:center;margin-bottom:10px;" autocapitalize="off" autocomplete="off"/>
+      <input id="loginPin" type="password" inputmode="numeric" maxlength="12" class="input login-input" placeholder="● ● ● ● ●" />
+      <div id="loginError" class="warn-text" style="display:none;margin-bottom:6px;">❌ Password မှားနေပါသည်</div>
+      <button class="btn full" style="background:var(--teal);margin-top:4px;" onclick="tryLogin()">🔓 ဝင်မည်</button>
+    </div>
+  </div>
+
+  <div id="appRoot" style="display:none;">
+    <div id="header">
+      <button class="header-logout" onclick="logoutApp()">🚪 Logout</button>
+      <h1>💊 ဆေးဆိုင် & ဆေးဂိုဒေါင် စီမံခန့်ခွဲမှု</h1>
+      <p>ဂိုဒေါင်ဝယ်ယူမှု · ဆိုင်သို့ရောင်းချ · customer ရောင်းချ · အကြွေး</p>
+      <div id="tabs"></div>
+    </div>
+    <div id="toast"></div>
+    <div id="content"></div>
+  </div>
+
+<script>
+/* ================= Admin Login ================= */
+const ADMIN_USER = 'admin';
+const ADMIN_PIN = '24681';
+function tryLogin(){
+  const user = (document.getElementById('loginUser').value||'').trim().toLowerCase();
+  const val = document.getElementById('loginPin').value;
+  if(user === ADMIN_USER && val === ADMIN_PIN){
+    sessionStorage.setItem('ph_authed','1');
+    document.getElementById('loginError').style.display='none';
+    showApp();
+  } else {
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('loginPin').value='';
+    document.getElementById('loginPin').focus();
+  }
+}
+function logoutApp(){
+  sessionStorage.removeItem('ph_authed');
+  document.getElementById('appRoot').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPin').value='';
+  document.getElementById('loginPin').focus();
+}
+function showApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appRoot').style.display='block';
+  load(); render();
+}
+
+/* ================= Storage ================= */
+const LS_KEYS = { medicines:'ph_medicines', orders:'ph_orders', purchases:'ph_purchases',
+  transfers:'ph_transfers', customers:'ph_customers', staff:'ph_staff', suppliers:'ph_suppliers' };
+const LOW_STOCK = 5;
+let state = { medicines:[], orders:[], purchases:[], transfers:[], customers:[], staff:[], suppliers:[{name:'999 ဆေးဆိုင်',address:''}] };
+let tab = 'dashboard';
+let whSubTab = 'buy';
+let cart = [], whCart = [], trCart = [];
+let editingMedId = null;
+
+function load(){
+  for(const k in LS_KEYS){
+    try{ const raw = localStorage.getItem(LS_KEYS[k]); if(raw) state[k] = JSON.parse(raw); }catch(e){}
+  }
+  if(!state.suppliers || state.suppliers.length===0) state.suppliers=[{name:'999 ဆေးဆိုင်',address:''}];
+  // migrate old plain-string suppliers to {name,address}
+  state.suppliers = state.suppliers.map(s => typeof s === 'string' ? {name:s, address:''} : s);
+}
+function save(k){ try{ localStorage.setItem(LS_KEYS[k], JSON.stringify(state[k])); toast('✓ သိမ်းပြီးပါပြီ'); }catch(e){ alert('Storage error: '+e.message); } }
+
+/* ================= Helpers ================= */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function fmt(n){ return Math.round(n||0).toLocaleString('en-US'); }
+function dayKey(d){ return d.toISOString().slice(0,10); }
+function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function fmtDT(iso){ const d=new Date(iso); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+const WD=['တနင်္ဂနွေ','တနင်္လာ','အင်္ဂါ','ဗုဒ္ဓဟူး','ကြာသပတေး','သောကြာ','စနေ'];
+const MN=['ဇန်','ဖေ','မတ်','ဧ','မေ','ဇွန်','ဇူ','ဩ','စက်','အောက်','နို','ဒီ'];
+function med(id){ return state.medicines.find(m=>m.id===id); }
+function itemCost(it){ return it.unitCost!=null ? it.unitCost : 0; }
+function suggestedTransferPrice(m){ return Math.round(m.companyPrice||0); }
+function suggestedCustomerPrice(m){ const base = m.shopCostPrice>0 ? m.shopCostPrice : (m.companyPrice||0)*1.10; return Math.round(base*1.10); }
+function findSupplier(name){ return state.suppliers.find(s=>s.name===name); }
+function toast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.style.display='block';
+  clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>{el.style.display='none';},1800);
+}
+function emptyMsg(text){ return `<div class="muted ta-c" style="padding:48px 0;">${text}</div>`; }
+
+/* ================= Dashboard calcs ================= */
+function calcStats(){
+  const now=new Date(); const todayStart=startOfDay(now);
+  const sevenStart=startOfDay(new Date(now.getTime()-6*86400000));
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  let today=0,last7=0,month=0,pToday=0,p7=0,pMonth=0;
+  state.orders.forEach(o=>{
+    const t=new Date(o.ts);
+    const profit=o.items.reduce((a,it)=>a+(it.unitPrice-itemCost(it))*it.qty,0);
+    if(t>=todayStart){today+=o.total;pToday+=profit;}
+    if(t>=sevenStart){last7+=o.total;p7+=profit;}
+    if(t>=monthStart){month+=o.total;pMonth+=profit;}
+  });
+  let whProfitMonth=0;
+  state.transfers.forEach(tr=>{
+    const t=new Date(tr.ts);
+    if(t>=monthStart){ whProfitMonth += tr.items.reduce((a,it)=>a+(it.unitPrice-it.unitCost)*it.qty,0); }
+  });
+  return {today,last7,month,pToday,p7,pMonth,whProfitMonth};
+}
+function dailySeries(){
+  const now=new Date(); const days=[]; const todayK=dayKey(startOfDay(now));
+  for(let i=6;i>=0;i--){
+    const d=startOfDay(new Date(now.getTime()-i*86400000)); const k=dayKey(d);
+    const total=state.orders.filter(o=>dayKey(new Date(o.ts))===k).reduce((a,o)=>a+o.total,0);
+    days.push({label:WD[d.getDay()],total,key:k,isToday:k===todayK});
+  }
+  return days;
+}
+function monthlySeries(){
+  const now=new Date(); const months=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const total=state.orders.filter(o=>{const t=new Date(o.ts);return t.getFullYear()===d.getFullYear()&&t.getMonth()===d.getMonth();}).reduce((a,o)=>a+o.total,0);
+    months.push({label:MN[d.getMonth()],total});
+  }
+  return months;
+}
+function bestSellers(limit=5){
+  const map={};
+  state.orders.forEach(o=>o.items.forEach(it=>{
+    if(!map[it.medicineId]) map[it.medicineId]={name:it.name,qty:0,revenue:0};
+    map[it.medicineId].qty+=it.qty; map[it.medicineId].revenue+=it.total;
+  }));
+  return Object.values(map).sort((a,b)=>b.revenue-a.revenue).slice(0,limit);
+}
+function weekBreakdown(){
+  const now=new Date(); const sevenStart=startOfDay(new Date(now.getTime()-6*86400000)); const map={};
+  state.orders.forEach(o=>{ if(new Date(o.ts)<sevenStart) return; o.items.forEach(it=>{
+    if(!map[it.medicineId]) map[it.medicineId]={name:it.name,qty:0,revenue:0};
+    map[it.medicineId].qty+=it.qty; map[it.medicineId].revenue+=it.total;
+  });});
+  return Object.values(map).sort((a,b)=>b.revenue-a.revenue);
+}
+function lowShopStock(){ return state.medicines.filter(m=>(m.shopStock||0)<=LOW_STOCK); }
+function lowWarehouseStock(){ return state.medicines.filter(m=>(m.warehouseStock||0)<=LOW_STOCK); }
+function totalCustomerDue(){ return state.orders.reduce((a,o)=>a+(o.due||0),0); }
+function totalSupplierDue(){ return state.purchases.reduce((a,p)=>a+(p.due||0),0); }
+
+function barChart(data,colorFn){
+  const max=Math.max(1,...data.map(d=>d.total));
+  return `<div class="bars">${data.map(d=>`
+    <div class="bar-col">
+      <div class="bar-track"><div class="bar-fill" style="height:${Math.max(2,Math.round((d.total/max)*100))}%;background:${colorFn(d)}"></div></div>
+      <div class="bar-val">${d.total>0?fmt(d.total):''}</div>
+      <div class="bar-label">${d.label}</div>
+    </div>`).join('')}</div>`;
+}
+function statCard(label,value,highlight,tone){
+  const isGreen=tone==='green';
+  const cls=highlight?(isGreen?'stat-highlight-green':'stat-highlight-amber'):'';
+  const color=isGreen?(highlight?'emerald-text':'emerald-text-soft'):(highlight?'amber-text':'');
+  return `<div class="stat-card ${cls}"><div class="muted small">${label}</div><div class="bold ${color}">${fmt(value)} <span class="tiny">Ks</span></div></div>`;
+}
+
+/* ================= Sales report (full list, day/week/month/all) ================= */
+let reportPeriod='today';
+function filteredOrdersForReport(){
+  const now=new Date();
+  if(reportPeriod==='today'){ const s=startOfDay(now); return state.orders.filter(o=>new Date(o.ts)>=s); }
+  if(reportPeriod==='week'){ const s=startOfDay(new Date(now.getTime()-6*86400000)); return state.orders.filter(o=>new Date(o.ts)>=s); }
+  if(reportPeriod==='month'){ const s=new Date(now.getFullYear(),now.getMonth(),1); return state.orders.filter(o=>new Date(o.ts)>=s); }
+  return state.orders;
+}
+function setReportPeriod(p){ reportPeriod=p; document.getElementById('reportArea').innerHTML=renderSalesReport(); }
+function renderSalesReport(){
+  const list=[...filteredOrdersForReport()].sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  const total=list.reduce((a,o)=>a+o.total,0);
+  const labels={today:'ယနေ့',week:'ဒီအပတ် (၇ ရက်)',month:'ဒီလ',all:'အားလုံး'};
+  return `
+    <div class="card">
+      <div class="card-title">📋 အရောင်းစာရင်း အပြည့်အစုံ</div>
+      <div class="subtabs" style="margin-bottom:10px;">
+        <button class="subtab ${reportPeriod==='today'?'active':''}" onclick="setReportPeriod('today')">ယနေ့</button>
+        <button class="subtab ${reportPeriod==='week'?'active':''}" onclick="setReportPeriod('week')">ဒီအပတ်</button>
+        <button class="subtab ${reportPeriod==='month'?'active':''}" onclick="setReportPeriod('month')">ဒီလ</button>
+        <button class="subtab ${reportPeriod==='all'?'active':''}" onclick="setReportPeriod('all')">အားလုံး</button>
+      </div>
+      <div class="row-between" style="margin-bottom:10px;">
+        <span class="small muted">${labels[reportPeriod]} — ${list.length} ကြိမ်</span>
+        <span class="bold teal-text">${fmt(total)} Ks</span>
+      </div>
+      ${list.length===0?`<div class="muted small ta-c" style="padding:16px 0;">ဒီကာလအတွင်း ရောင်းချမှု မရှိသေးပါ</div>`:`
+      <div style="max-height:340px;overflow-y:auto;">
+      ${list.map(o=>`
+        <div class="hist-row">
+          <div class="row-between">
+            <div class="min0">
+              <div class="bold small truncate">${o.buyerName||'Customer'}</div>
+              <div class="muted small">${fmtDT(o.ts)}${o.seller?` · ${o.seller}`:''}</div>
+              <div class="muted small truncate">${o.items.map(it=>it.name+' ×'+it.qty).join(', ')}</div>
+            </div>
+            <div class="ta-r">
+              <div class="bold small">${fmt(o.total)} Ks</div>
+              ${o.due>0?`<div class="small red-text">ကျန် ${fmt(o.due)}</div>`:`<div class="small" style="color:var(--green);">ပြည့်</div>`}
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>`}
+    </div>`;
+}
+
+/* ================= Dashboard tab ================= */
+function renderDashboard(){
+  if(state.medicines.length===0 && state.orders.length===0){
+    return emptyMsg('ဆေးများ ထည့်ပြီး ဂိုဒေါင်ကနေ စတင်ပါ — Dashboard ကို ဒေတာအလိုအလျောက် ဖြည့်ပေးပါမည်');
+  }
+  const s=calcStats(); const daily=dailySeries(); const monthly=monthlySeries();
+  const bs=bestSellers(); const wb=weekBreakdown();
+  const lowShop=lowShopStock(); const lowWh=lowWarehouseStock();
+  const custDue=totalCustomerDue(); const supDue=totalSupplierDue();
+  return `
+    ${lowShop.length?`<div class="alert-card red-alert"><div>⚠️</div><div class="min0"><div class="bold small red-text">ဆေးဆိုင်ငယ်တွင် Stock နည်းနေသော ဆေးများ (${lowShop.length})</div><div class="small red-text">${lowShop.map(m=>`${m.name} (${m.shopStock||0})`).join(' · ')}</div></div></div>`:''}
+    ${lowWh.length?`<div class="alert-card indigo-alert"><div>🚚</div><div class="min0"><div class="bold small indigo-text">ဆေးဂိုဒေါင်တွင် Stock နည်းနေသော ဆေးများ (${lowWh.length})</div><div class="small indigo-text">${lowWh.map(m=>`${m.name} (${m.warehouseStock||0})`).join(' · ')}</div></div></div>`:''}
+    ${(custDue>0||supDue>0)?`<div class="grid-2">
+      ${custDue>0?`<div class="mini-stat amber-bg-soft"><div class="small amber-text">ဖောက်သည် အကြွေး</div><div class="bold amber-text">${fmt(custDue)} Ks</div></div>`:'<div></div>'}
+      ${supDue>0?`<div class="mini-stat indigo-bg-soft"><div class="small indigo-text">Company ကို ပေးရန်ကျန်</div><div class="bold indigo-text">${fmt(supDue)} Ks</div></div>`:'<div></div>'}
+    </div>`:''}
+    <div class="section-label">ဆေးဆိုင်ငယ် ရောင်းအား (Customer)</div>
+    <div class="grid-3">${statCard('ယနေ့',s.today)}${statCard('ဒီရက် ၇ ရက်',s.last7)}${statCard('ဒီလ',s.month,true)}</div>
+    <div class="section-label">ဆေးဆိုင်ငယ် အမြတ် (Profit)</div>
+    <div class="grid-3">${statCard('ယနေ့',s.pToday,false,'green')}${statCard('ဒီရက် ၇ ရက်',s.p7,false,'green')}${statCard('ဒီလ',s.pMonth,true,'green')}</div>
+    <div class="mini-stat green-bg-soft" style="margin-bottom:12px;"><div class="small" style="color:var(--green);">ဂိုဒေါင် အမြတ် (ဒီလ) — ဂိုဒေါင်ကနေ ဆိုင်ကိုရောင်းရာမှ</div><div class="bold" style="color:var(--green);">${fmt(s.whProfitMonth)} Ks</div></div>
+    <div class="card"><div class="card-title">ရက်အလိုက် ရောင်းအား (ဒီရက် ၇ ရက်)</div>${barChart(daily,d=>d.isToday?'var(--amber)':'var(--teal)')}</div>
+    <div class="card"><div class="card-title">လအလိုက် ရောင်းအား (ဒီလ ၆ လ)</div>${barChart(monthly,()=> 'var(--teal-dark)')}</div>
+    <div class="card">
+      <div class="card-title">အရောင်းရဆုံး ဆေးများ</div>
+      ${bs.length===0?`<div class="muted small">ရောင်းချမှု မရှိသေးပါ</div>`:bs.map((b,i)=>`
+        <div class="row-between" style="margin-bottom:8px;">
+          <div class="row-left"><span class="badge-num" style="background:${i===0?'var(--amber)':'var(--teal)'}">${i+1}</span><span class="truncate">${b.name}</span></div>
+          <div class="row-right"><div>${fmt(b.revenue)} Ks</div><div class="muted small">${b.qty} ခု</div></div>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">ဒီအပတ် ဆေးအလိုက် ရောင်းချမှု (၇ ရက်)</div>
+      ${wb.length===0?`<div class="muted small">ဒီအပတ် ရောင်းချမှု မရှိသေးပါ</div>`:`
+      <table class="table"><thead><tr><th>ဆေးအမည်</th><th class="ta-r">အရေအတွက်</th><th class="ta-r">ရောင်းအား</th></tr></thead>
+      <tbody>${wb.map(w=>`<tr><td class="truncate">${w.name}</td><td class="ta-r">${w.qty}</td><td class="ta-r">${fmt(w.revenue)}</td></tr>`).join('')}</tbody></table>`}
+    </div>
+    <div id="reportArea">${renderSalesReport()}</div>
+    <div class="card">
+      <div class="card-title">ဒေတာ Backup</div>
+      <div class="muted small" style="margin-bottom:10px;">ဒေတာက ဒီ browser ထဲမှာပဲ သိမ်းထားတာမို့ browser cache ရှင်းလိုက်ရင် ပျောက်နိုင်ပါတယ်။ ခဏခဏ Export ပြီး file သိမ်းထားပါ။</div>
+      <div class="row-gap">
+        <button class="btn btn-outline flex1" onclick="exportData()">⬇ Export</button>
+        <button class="btn btn-outline flex1" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)"/>
+    </div>
+  `;
+}
+
+/* ================= Sell tab (Shop -> Customer, custom price) ================= */
+function renderSell(){
+  if(state.medicines.length===0) return emptyMsg('အရင်ဆုံး "ဆေးများ" tab တွင် ဆေးထည့်ပါ');
+  return `
+    <div class="card">
+      <div class="card-title">ဆေးထည့်ရန် (customer ကို ရောင်းမည်)</div>
+      <select id="sellPick" class="input" onchange="sellPickChange()">
+        <option value="">-- ဆေးရွေးရန် --</option>
+        ${state.medicines.map(m=>`<option value="${m.id}">${m.name} (stock ${m.shopStock||0})</option>`).join('')}
+      </select>
+      <div class="row-gap" style="flex-wrap:wrap;">
+        <input id="sellQty" type="number" min="1" value="1" class="input flex1" style="margin-bottom:0;min-width:70px;" placeholder="အရေအတွက်"/>
+        <input id="sellPrice" type="number" class="input price-input" style="margin-bottom:0;" placeholder="ရောင်းစျေး"/>
+        <button class="btn" style="background:var(--teal);padding:9px 16px;" onclick="sellAddToCart()">+</button>
+      </div>
+      <div id="sellStockWarn" class="warn-text"></div>
+    </div>
+    <div id="sellCartArea">${renderSellCart()}</div>
+  `;
+}
+function sellPickChange(){
+  const m=med(document.getElementById('sellPick').value);
+  document.getElementById('sellPrice').value = m ? suggestedCustomerPrice(m) : '';
+}
+function renderSellCart(){
+  if(cart.length===0) return '';
+  const total=cart.reduce((a,it)=>a+it.total,0);
+  return `
+    <div class="card">
+      <div class="card-title">ဝယ်စာရင်း</div>
+      ${cart.map(it=>`
+        <div class="cart-row">
+          <div class="min0 flex1"><div class="truncate">${it.name}</div><div class="muted small">${fmt(it.unitPrice)} Ks × ${it.qty}</div></div>
+          <div class="qty-ctrl">
+            <button class="qbtn" onclick="sellChangeQty('${it.medicineId}',-1)">−</button><span>${it.qty}</span>
+            <button class="qbtn" onclick="sellChangeQty('${it.medicineId}',1)">+</button>
+            <button class="del-btn" onclick="sellRemove('${it.medicineId}')">🗑</button>
+          </div>
+          <div class="cart-total">${fmt(it.total)}</div>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">ဝယ်သူ & ရောင်းသူ</div>
+      <div class="grid-2">
+        <div><label class="lbl">ဝယ်သူအမည်</label><input id="buyerName" list="custList" class="input" placeholder="အမည်"/>
+        <datalist id="custList">${state.customers.map(c=>`<option value="${c.name}">`).join('')}</datalist></div>
+        <div><label class="lbl">ဖုန်း</label><input id="buyerPhone" class="input" placeholder="09xxxxxxxx"/></div>
+      </div>
+      <label class="lbl">ဝယ်သူ လိပ်စာ (ရွေးချယ်ခွင့်)</label>
+      <input id="buyerAddress" class="input" placeholder="လိပ်စာ"/>
+      <label class="lbl">ရောင်းသူအမည်</label>
+      <input id="sellerName" list="staffList" class="input" placeholder="ဝန်ထမ်းအမည်"/>
+      <datalist id="staffList">${state.staff.map(s=>`<option value="${s}">`).join('')}</datalist>
+      <div class="highlight-box">
+        <div class="row-between bold teal-text" style="margin-bottom:8px;"><span>စုစုပေါင်း</span><span>${fmt(total)} Ks</span></div>
+        <label class="lbl">ရငွေ (ဗလာချန်ရင် အပြည့်ယူမည်)</label>
+        <input id="paidAmt" type="number" class="input" placeholder="${total}" style="margin-bottom:0;"/>
+      </div>
+      <button class="btn full" style="background:var(--teal);" onclick="sellCheckout()">🧾 ဘောင်ချာဖြတ် / ရောင်းမည်</button>
+    </div>
+  `;
+}
+function sellAddToCart(){
+  const id=document.getElementById('sellPick').value;
+  const qty=Math.max(0,parseInt(document.getElementById('sellQty').value||'0',10));
+  const priceRaw=document.getElementById('sellPrice').value;
+  const m=med(id); if(!m||qty<=0) return;
+  const price = priceRaw===''? suggestedCustomerPrice(m) : Math.max(0,parseFloat(priceRaw)||0);
+  const cost = m.shopCostPrice>0 ? m.shopCostPrice : (m.companyPrice||0)*1.10;
+  const existing=cart.find(it=>it.medicineId===id);
+  if(existing){ existing.qty+=qty; existing.unitPrice=price; existing.total=existing.qty*price; }
+  else cart.push({medicineId:id,name:m.name,unitPrice:price,unitCost:cost,qty,total:price*qty});
+  document.getElementById('sellQty').value='1'; document.getElementById('sellPick').value=''; document.getElementById('sellPrice').value='';
+  document.getElementById('sellCartArea').innerHTML=renderSellCart();
+  document.getElementById('sellStockWarn').textContent = qty>(m.shopStock||0) ? `⚠ Stock (${m.shopStock||0} ခု) ထက် ပိုသွားပါသည်` : '';
+}
+function sellChangeQty(id,delta){ const it=cart.find(x=>x.medicineId===id); if(!it)return; it.qty=Math.max(1,it.qty+delta); it.total=it.qty*it.unitPrice; document.getElementById('sellCartArea').innerHTML=renderSellCart(); }
+function sellRemove(id){ cart=cart.filter(x=>x.medicineId!==id); document.getElementById('sellCartArea').innerHTML=renderSellCart(); }
+function sellCheckout(){
+  if(cart.length===0) return;
+  const total=cart.reduce((a,it)=>a+it.total,0);
+  const paidRaw=document.getElementById('paidAmt').value;
+  const paid = paidRaw===''? total : Math.max(0,parseFloat(paidRaw)||0);
+  const due=Math.max(0,total-paid);
+  const order={ id:uid(), ts:new Date().toISOString(),
+    seller:(document.getElementById('sellerName').value||'').trim(),
+    buyerName:(document.getElementById('buyerName').value||'').trim(),
+    buyerPhone:(document.getElementById('buyerPhone').value||'').trim(),
+    buyerAddress:(document.getElementById('buyerAddress').value||'').trim(),
+    items:cart, total, paid, due };
+  state.orders.unshift(order); save('orders');
+  state.medicines = state.medicines.map(m=>{ const it=order.items.find(x=>x.medicineId===m.id); if(!it) return m; return {...m, shopStock:Math.max(0,(m.shopStock||0)-it.qty)}; });
+  save('medicines');
+  if(order.buyerName){
+    const existingCust = state.customers.find(c=>c.name===order.buyerName && c.phone===order.buyerPhone);
+    if(existingCust){ if(order.buyerAddress) existingCust.address = order.buyerAddress; save('customers'); }
+    else { state.customers.unshift({id:uid(),name:order.buyerName,phone:order.buyerPhone,address:order.buyerAddress}); save('customers'); }
+  }
+  if(order.seller && !state.staff.includes(order.seller)){ state.staff.unshift(order.seller); save('staff'); }
+  cart=[];
+  toast(`ရောင်းချပြီးပါပြီ — ${fmt(order.total)} Ks${order.due>0?` (အကြွေး ${fmt(order.due)} Ks)`:''}`);
+  render();
+  showReceipt(order);
+}
+function showReceipt(order){
+  const modal=document.createElement('div'); modal.className='modal-overlay';
+  modal.innerHTML=`
+    <div class="modal-box">
+      <div class="ta-c"><div class="bold">ဘောင်ချာ / Receipt</div><div class="muted small">${fmtDT(order.ts)}</div></div>
+      <div class="small" style="margin:10px 0;">
+        ${order.buyerName?`<div>ဝယ်သူ: ${order.buyerName} ${order.buyerPhone?`(${order.buyerPhone})`:''}</div>`:''}
+        ${order.buyerAddress?`<div>လိပ်စာ: ${order.buyerAddress}</div>`:''}
+        ${order.seller?`<div>ရောင်းသူ: ${order.seller}</div>`:''}
+      </div>
+      <table class="table small"><thead><tr><th>ဆေး</th><th class="ta-r">အရေအတွက်</th><th class="ta-r">စျေးနှုန်း</th></tr></thead>
+      <tbody>${order.items.map(it=>`<tr><td>${it.name}</td><td class="ta-r">${it.qty}</td><td class="ta-r">${fmt(it.total)}</td></tr>`).join('')}</tbody></table>
+      <div style="border-top:1px solid #e2e8f0;margin-top:10px;padding-top:10px;">
+        <div class="row-between bold" style="margin-bottom:4px;"><span>စုစုပေါင်း</span><span>${fmt(order.total)} Ks</span></div>
+        <div class="row-between muted small" style="margin-bottom:4px;"><span>ရငွေ</span><span>${fmt(order.paid)} Ks</span></div>
+        ${order.due>0?`<div class="row-between bold red-text"><span>အကြွေးလက်ကျန်</span><span>${fmt(order.due)} Ks</span></div>`:''}
+      </div>
+      <div class="row-gap" style="margin-top:16px;">
+        <button class="btn btn-outline flex1" onclick="window.print()">🖨 Print</button>
+        <button class="btn flex1" style="background:var(--teal);" onclick="this.closest('.modal-overlay').remove()">ပြီးပြီ</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+/* ================= Warehouse tab ================= */
+function renderWarehouse(){
+  return `
+    <div class="subtabs">
+      <button class="subtab ${whSubTab==='buy'?'active':''}" onclick="setWhSub('buy')">Company ထံမှ ဝယ်ယူ</button>
+      <button class="subtab ${whSubTab==='transfer'?'active':''}" onclick="setWhSub('transfer')">ဆေးဆိုင်ငယ်သို့ ရောင်း</button>
+    </div>
+    <div id="whContent">${whSubTab==='buy'?renderWhBuy():renderWhTransfer()}</div>
+  `;
+}
+function setWhSub(v){ whSubTab=v; document.getElementById('whContent').innerHTML = v==='buy'?renderWhBuy():renderWhTransfer(); }
+
+/* --- Buy from company (with supplier name + address) --- */
+function renderWhBuy(){
+  if(state.medicines.length===0) return emptyMsg('အရင်ဆုံး "ဆေးများ" tab တွင် ဆေးထည့်ပါ');
+  const now=new Date(); const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const monthTotal=state.purchases.filter(p=>new Date(p.ts)>=monthStart).reduce((a,p)=>a+p.total,0);
+  return `
+    <div class="grid-2">
+      <div class="card small-pad"><div class="muted small">ဒီလ ဝယ်ငွေ</div><div class="bold indigo-text">${fmt(monthTotal)} Ks</div></div>
+      <div class="card small-pad"><div class="muted small">စုစုပေါင်း Order</div><div class="bold">${state.purchases.length} ကြိမ်</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ဆေးဝယ်ရန် (ဂိုဒေါင်သို့)</div>
+      <select id="whPick" class="input" onchange="whPickChange()">
+        <option value="">-- ဆေးရွေးရန် --</option>
+        ${state.medicines.map(m=>`<option value="${m.id}">${m.name} (လက်ရှိဝယ်စျေး ${fmt(m.companyPrice)} Ks)</option>`).join('')}
+      </select>
+      <div class="grid-2">
+        <div><label class="lbl">အရေအတွက်</label><input id="whQty" type="number" min="1" value="1" class="input"/></div>
+        <div><label class="lbl">Company စျေးနှုန်း (မူရင်း)</label><input id="whListPrice" type="number" class="input" placeholder="0" oninput="whListPriceChange()"/></div>
+      </div>
+      <label class="lbl">ဂိုဒေါင်ဝယ်စျေး (10% ပါဝင်ပြီး — လိုအပ်ရင် ပြင်နိုင်သည်)</label>
+      <input id="whCost" type="number" class="input" placeholder="0"/>
+      <button class="btn full" style="background:var(--indigo);" onclick="whAddToCart()">+ ထည့်မည်</button>
+    </div>
+    <div id="whCartArea">${renderWhCart()}</div>
+    <div class="card"><div class="card-title">ဝယ်ယူမှု မှတ်တမ်း</div>${renderPurchaseHistory()}</div>
+  `;
+}
+function whPickChange(){ const m=med(document.getElementById('whPick').value); document.getElementById('whCost').value = m? m.companyPrice : ''; document.getElementById('whListPrice').value=''; }
+function whListPriceChange(){
+  const lp=parseFloat(document.getElementById('whListPrice').value)||0;
+  document.getElementById('whCost').value = lp>0 ? Math.round(lp*1.10) : '';
+}
+function whAddToCart(){
+  const id=document.getElementById('whPick').value;
+  const qty=Math.max(0,parseInt(document.getElementById('whQty').value||'0',10));
+  const costRaw=document.getElementById('whCost').value;
+  const m=med(id); if(!m||qty<=0) return;
+  const cost = costRaw===''? m.companyPrice : Math.max(0,parseFloat(costRaw)||0);
+  if(cost<=0) return;
+  const existing=whCart.find(it=>it.medicineId===id);
+  if(existing){ existing.qty+=qty; existing.unitCost=cost; existing.total=existing.qty*cost; }
+  else whCart.push({medicineId:id,name:m.name,unitCost:cost,qty,total:cost*qty});
+  document.getElementById('whPick').value=''; document.getElementById('whQty').value='1'; document.getElementById('whCost').value=''; document.getElementById('whListPrice').value='';
+  document.getElementById('whCartArea').innerHTML=renderWhCart();
+}
+function whChangeQty(id,delta){ const it=whCart.find(x=>x.medicineId===id); if(!it)return; it.qty=Math.max(1,it.qty+delta); it.total=it.qty*it.unitCost; document.getElementById('whCartArea').innerHTML=renderWhCart(); }
+function whRemove(id){ whCart=whCart.filter(x=>x.medicineId!==id); document.getElementById('whCartArea').innerHTML=renderWhCart(); }
+function whSupplierNameChange(){
+  const name=(document.getElementById('whSupplier').value||'').trim();
+  const s=findSupplier(name);
+  if(s) document.getElementById('whSupplierAddr').value = s.address||'';
+}
+function renderWhCart(){
+  if(whCart.length===0) return '';
+  const total=whCart.reduce((a,it)=>a+it.total,0);
+  return `
+    <div class="card">
+      <div class="card-title">ဝယ်စာရင်း</div>
+      ${whCart.map(it=>`
+        <div class="cart-row">
+          <div class="min0 flex1"><div class="truncate">${it.name}</div><div class="muted small">${fmt(it.unitCost)} Ks × ${it.qty}</div></div>
+          <div class="qty-ctrl">
+            <button class="qbtn" onclick="whChangeQty('${it.medicineId}',-1)">−</button><span>${it.qty}</span>
+            <button class="qbtn" onclick="whChangeQty('${it.medicineId}',1)">+</button>
+            <button class="del-btn" onclick="whRemove('${it.medicineId}')">🗑</button>
+          </div>
+          <div class="cart-total">${fmt(it.total)}</div>
+        </div>`).join('')}
+      <label class="lbl" style="margin-top:6px;">Company အမည် (ဆေးဝယ်ရာ)</label>
+      <input id="whSupplier" list="supList" class="input" value="999 ဆေးဆိုင်" oninput="whSupplierNameChange()"/>
+      <datalist id="supList">${state.suppliers.map(s=>`<option value="${s.name}">`).join('')}</datalist>
+      <label class="lbl">Company လိပ်စာ</label>
+      <input id="whSupplierAddr" class="input" placeholder="လိပ်စာ ထည့်ပါ" value="${(findSupplier('999 ဆေးဆိုင်')||{}).address||''}"/>
+      <div class="highlight-box indigo-bg">
+        <div class="row-between bold indigo-text" style="margin-bottom:8px;"><span>စုစုပေါင်း</span><span>${fmt(total)} Ks</span></div>
+        <label class="lbl">ငါတို့ ပေးငွေ (ဗလာချန်ရင် အပြည့်ယူမည်)</label>
+        <input id="whPaid" type="number" class="input" placeholder="${total}" style="margin-bottom:0;"/>
+      </div>
+      <button class="btn full" style="background:var(--indigo-dark);" onclick="whCheckout()">🚚 ဝယ်ပြီးပြီ (ဂိုဒေါင် Stock ထည့်မည်)</button>
+    </div>`;
+}
+function whCheckout(){
+  if(whCart.length===0) return;
+  const total=whCart.reduce((a,it)=>a+it.total,0);
+  const supplierName=(document.getElementById('whSupplier').value||'').trim();
+  const supplierAddr=(document.getElementById('whSupplierAddr').value||'').trim();
+  if(!supplierName) return;
+  const paidRaw=document.getElementById('whPaid').value;
+  const paid = paidRaw===''? total : Math.max(0,parseFloat(paidRaw)||0);
+  const due=Math.max(0,total-paid);
+  const purchase={id:uid(),ts:new Date().toISOString(),supplier:supplierName,supplierAddress:supplierAddr,items:whCart,total,paid,due};
+  state.purchases.unshift(purchase); save('purchases');
+  state.medicines = state.medicines.map(m=>{
+    const it=purchase.items.find(x=>x.medicineId===m.id); if(!it) return m;
+    return {...m, warehouseStock:(m.warehouseStock||0)+it.qty, companyPrice:it.unitCost};
+  });
+  save('medicines');
+  const existingSup=findSupplier(supplierName);
+  if(existingSup){ existingSup.address = supplierAddr || existingSup.address; }
+  else state.suppliers.unshift({name:supplierName, address:supplierAddr});
+  save('suppliers');
+  whCart=[];
+  toast(`ဝယ်ယူမှု မှတ်တမ်းတင်ပြီးပါပြီ — ${fmt(total)} Ks${due>0?` (ကျန်ငွေ ${fmt(due)})`:''}`);
+  render();
+  showPurchaseInvoice(purchase);
+}
+function showPurchaseInvoice(p){
+  const modal=document.createElement('div'); modal.className='modal-overlay';
+  modal.innerHTML=`
+    <div class="modal-box">
+      <div class="ta-c"><div class="bold">ဝယ်ယူမှု ဘောင်ချာ / Purchase Invoice</div><div class="muted small">${fmtDT(p.ts)}</div></div>
+      <div class="small" style="margin:10px 0;">
+        <div>Company: ${p.supplier}</div>
+        ${p.supplierAddress?`<div>လိပ်စာ: ${p.supplierAddress}</div>`:''}
+      </div>
+      <table class="table small"><thead><tr><th>ဆေး</th><th class="ta-r">အရေအတွက်</th><th class="ta-r">စျေးနှုန်း</th></tr></thead>
+      <tbody>${p.items.map(it=>`<tr><td>${it.name}</td><td class="ta-r">${it.qty}</td><td class="ta-r">${fmt(it.total)}</td></tr>`).join('')}</tbody></table>
+      <div style="border-top:1px solid #e2e8f0;margin-top:10px;padding-top:10px;">
+        <div class="row-between bold" style="margin-bottom:4px;"><span>စုစုပေါင်း</span><span>${fmt(p.total)} Ks</span></div>
+        <div class="row-between muted small" style="margin-bottom:4px;"><span>ပေးငွေ</span><span>${fmt(p.paid)} Ks</span></div>
+        ${p.due>0?`<div class="row-between bold red-text"><span>ကျန်ငွေ</span><span>${fmt(p.due)} Ks</span></div>`:''}
+      </div>
+      <div class="row-gap" style="margin-top:16px;">
+        <button class="btn btn-outline flex1" onclick="window.print()">🖨 Print</button>
+        <button class="btn flex1" style="background:var(--indigo);" onclick="this.closest('.modal-overlay').remove()">ပြီးပြီ</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+function renderPurchaseHistory(){
+  const list=[...state.purchases].sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,20);
+  if(list.length===0) return `<div class="muted small">ဝယ်ယူမှု မရှိသေးပါ</div>`;
+  return list.map(p=>`
+    <div class="hist-row">
+      <div class="row-between">
+        <div class="min0"><div class="bold small truncate">${p.supplier}</div>${p.supplierAddress?`<div class="muted small truncate">${p.supplierAddress}</div>`:''}<div class="muted small">${fmtDT(p.ts)} · ${p.items.length} မျိုး</div></div>
+        <div class="ta-r"><div class="muted small">${fmt(p.total)} Ks</div>${p.due>0?`<div class="bold red-text small">ကျန် ${fmt(p.due)}</div>`:''}</div>
+      </div>
+      ${p.due>0?`<button class="btn btn-outline-indigo full small-btn" onclick="paySupplierPrompt('${p.id}')">Company ကို ငွေပေးမည်</button>`:''}
+    </div>`).join('');
+}
+function paySupplierPrompt(id){
+  const p=state.purchases.find(x=>x.id===id); if(!p) return;
+  const amtStr=prompt(`ပေးမည့်ငွေပမာဏ ထည့်ပါ (အများဆုံး ${p.due})`, String(p.due));
+  if(amtStr===null) return;
+  const amt=Math.min(p.due, Math.max(0,parseFloat(amtStr)||0));
+  if(amt<=0) return;
+  p.paid=(p.paid||0)+amt; p.due=Math.max(0,p.total-p.paid);
+  save('purchases'); toast('Company ငွေပေးချေမှု မှတ်တမ်းတင်ပြီးပါပြီ'); render();
+}
+
+/* --- Transfer / internal sale: warehouse -> shop, 10% markup, monetary --- */
+function renderWhTransfer(){
+  if(state.medicines.length===0) return emptyMsg('အရင်ဆုံး "ဆေးများ" tab တွင် ဆေးထည့်ပါ');
+  return `
+    <div class="card">
+      <div class="card-title">ဂိုဒေါင်မှ ဆေးဆိုင်ငယ်သို့ ပို့ရန် (ကုန်ကျစျေးအတိုင်း — လိုအပ်ရင် ပြင်နိုင်သည်)</div>
+      <select id="trPick" class="input" onchange="trPickChange()">
+        <option value="">-- ဆေးရွေးရန် --</option>
+        ${state.medicines.map(m=>`<option value="${m.id}">${m.name} (ဂိုဒေါင်ကျန် ${m.warehouseStock||0})</option>`).join('')}
+      </select>
+      <div class="row-gap" style="flex-wrap:wrap;">
+        <input id="trQty" type="number" min="1" value="1" class="input flex1" style="margin-bottom:0;min-width:70px;" placeholder="အရေအတွက်"/>
+        <input id="trPrice" type="number" class="input price-input" style="margin-bottom:0;" placeholder="ရောင်းစျေး"/>
+        <button class="btn" style="background:var(--indigo);padding:9px 16px;" onclick="trAddToCart()">+</button>
+      </div>
+      <div id="trWarn" class="warn-text"></div>
+    </div>
+    <div id="trCartArea">${renderTrCart()}</div>
+    <div class="card"><div class="card-title">ဆိုင်သို့ ရောင်းချမှု မှတ်တမ်း</div>${renderTransferHistory()}</div>
+  `;
+}
+function trPickChange(){
+  const m=med(document.getElementById('trPick').value);
+  document.getElementById('trPrice').value = m ? suggestedTransferPrice(m) : '';
+}
+function trAddToCart(){
+  const id=document.getElementById('trPick').value;
+  const qty=Math.max(0,parseInt(document.getElementById('trQty').value||'0',10));
+  const priceRaw=document.getElementById('trPrice').value;
+  const m=med(id); if(!m||qty<=0) return;
+  const price = priceRaw===''? suggestedTransferPrice(m) : Math.max(0,parseFloat(priceRaw)||0);
+  const existing=trCart.find(x=>x.medicineId===id);
+  if(existing){ existing.qty+=qty; existing.unitPrice=price; existing.total=existing.qty*price; }
+  else trCart.push({medicineId:id,name:m.name,unitCost:m.companyPrice||0,unitPrice:price,qty,total:price*qty});
+  document.getElementById('trQty').value='1'; document.getElementById('trPick').value=''; document.getElementById('trPrice').value='';
+  document.getElementById('trCartArea').innerHTML=renderTrCart();
+  document.getElementById('trWarn').textContent = qty>(m.warehouseStock||0) ? `⚠ ဂိုဒေါင်တွင် ကျန်ပမာဏ (${m.warehouseStock||0}) ထက်ပိုနေပါသည်` : '';
+}
+function trChangeQty(id,delta){ const it=trCart.find(x=>x.medicineId===id); if(!it)return; it.qty=Math.max(1,it.qty+delta); it.total=it.qty*it.unitPrice; document.getElementById('trCartArea').innerHTML=renderTrCart(); }
+function trRemove(id){ trCart=trCart.filter(x=>x.medicineId!==id); document.getElementById('trCartArea').innerHTML=renderTrCart(); }
+function renderTrCart(){
+  if(trCart.length===0) return '';
+  const total=trCart.reduce((a,it)=>a+it.total,0);
+  return `
+    <div class="card">
+      <div class="card-title">ရောင်းမည့်စာရင်း</div>
+      ${trCart.map(it=>`
+        <div class="cart-row">
+          <div class="min0 flex1"><div class="truncate">${it.name}</div><div class="muted small">${fmt(it.unitPrice)} Ks × ${it.qty}</div></div>
+          <div class="qty-ctrl">
+            <button class="qbtn" onclick="trChangeQty('${it.medicineId}',-1)">−</button><span>${it.qty}</span>
+            <button class="qbtn" onclick="trChangeQty('${it.medicineId}',1)">+</button>
+            <button class="del-btn" onclick="trRemove('${it.medicineId}')">🗑</button>
+          </div>
+          <div class="cart-total">${fmt(it.total)}</div>
+        </div>`).join('')}
+      <div class="highlight-box indigo-bg" style="margin-top:8px;"><div class="row-between bold indigo-text"><span>စုစုပေါင်း</span><span>${fmt(total)} Ks</span></div></div>
+      <button class="btn full" style="background:var(--indigo-dark);" onclick="trCheckout()">✅ ဆိုင်သို့ ရောင်းမည်</button>
+    </div>`;
+}
+function trCheckout(){
+  if(trCart.length===0) return;
+  const total=trCart.reduce((a,it)=>a+it.total,0);
+  const transfer={id:uid(),ts:new Date().toISOString(),items:trCart,total};
+  state.transfers.unshift(transfer); save('transfers');
+  state.medicines = state.medicines.map(m=>{
+    const it=transfer.items.find(x=>x.medicineId===m.id); if(!it) return m;
+    return {...m, warehouseStock:Math.max(0,(m.warehouseStock||0)-it.qty), shopStock:(m.shopStock||0)+it.qty, shopCostPrice:it.unitPrice};
+  });
+  save('medicines');
+  const profit=transfer.items.reduce((a,it)=>a+(it.unitPrice-it.unitCost)*it.qty,0);
+  trCart=[];
+  toast(`ဆိုင်သို့ ရောင်းချပြီးပါပြီ — ${fmt(total)} Ks (အမြတ် ${fmt(profit)} Ks)`);
+  render();
+}
+function renderTransferHistory(){
+  const list=[...state.transfers].sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,20);
+  if(list.length===0) return `<div class="muted small">ရောင်းချမှု မရှိသေးပါ</div>`;
+  return list.map(t=>{
+    const profit=t.items.reduce((a,it)=>a+(it.unitPrice-it.unitCost)*it.qty,0);
+    return `<div class="hist-row">
+      <div class="row-between"><div class="muted small">${fmtDT(t.ts)}</div><div class="ta-r"><div class="bold small">${fmt(t.total)} Ks</div><div class="small" style="color:var(--green);">အမြတ် ${fmt(profit)}</div></div></div>
+      <div class="small" style="margin-top:4px;">${t.items.map(it=>`${it.name} ×${it.qty}`).join(', ')}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ================= Medicines tab ================= */
+function renderMedicines(){
+  return `
+    <button class="btn full" style="background:var(--teal);margin-bottom:12px;" onclick="showMedForm()">+ ဆေးအသစ် ထည့်မည်</button>
+    <div id="medFormArea"></div>
+    <div id="medListArea">${renderMedList()}</div>
+  `;
+}
+function showMedForm(id){
+  editingMedId = id || null;
+  const m = id ? med(id) : null;
+  document.getElementById('medFormArea').innerHTML = `
+    <div class="card">
+      <div class="row-between" style="margin-bottom:6px;"><div class="card-title" style="margin-bottom:0;">${m?'ဆေးအချက်အလက် ပြင်ဆင်ရန်':'ဆေးအသစ်'}</div><button onclick="hideMedForm()" class="icon-btn">✕</button></div>
+      <label class="lbl">ဆေးအမည်</label>
+      <input id="medName" class="input" value="${m?m.name:''}" placeholder="ဥပမာ - Paracetamol 500mg"/>
+      <label class="lbl">Company ဝယ်စျေး (Ks)</label>
+      <input id="medCost" type="number" class="input" value="${m?m.companyPrice:''}" placeholder="0"/>
+      <label class="lbl">ဂိုဒေါင် Stock</label>
+      <input id="medWhStock" type="number" class="input" value="${m?(m.warehouseStock||0):0}"/>
+      <div class="muted small" style="margin-bottom:8px;">ℹ️ ဆေးအသစ်ထည့်ရင် / ဒီနေရာကနေ ပြင်ရင် <b>ဂိုဒေါင် Stock ကိုသာ</b> ပြောင်းပေးပါမည် — ဆိုင် Stock ကို ပြောင်းချင်ရင် "ဂိုဒေါင် → ဆေးဆိုင်ငယ်သို့ ပို့ရန်" ကနေပဲ လွှဲပေးရပါမယ်။</div>
+      ${m?`<div class="muted small" style="margin-bottom:8px;">လက်ရှိ ဆိုင် Stock: <b>${m.shopStock||0}</b>${m.shopCostPrice>0?` · ဆိုင်ရဲ့ ကုန်ကျစျေး: <b>${fmt(m.shopCostPrice)} Ks</b>`:''}</div>`:''}
+      <button class="btn full" style="background:var(--teal-dark);" onclick="saveMed()">${m?'သိမ်းမည်':'ထည့်မည်'}</button>
+    </div>`;
+}
+function hideMedForm(){ document.getElementById('medFormArea').innerHTML=''; }
+function saveMed(){
+  const name=(document.getElementById('medName').value||'').trim();
+  const cost=parseFloat(document.getElementById('medCost').value)||0;
+  const whStock=Math.max(0,parseInt(document.getElementById('medWhStock').value||'0',10));
+  if(!name||cost<=0) return;
+  const prev = editingMedId ? med(editingMedId) : null;
+  const record={id:editingMedId||uid(), name, companyPrice:cost, warehouseStock:whStock, shopStock: prev?(prev.shopStock||0):0, shopCostPrice: prev?prev.shopCostPrice||0:0};
+  if(editingMedId) state.medicines=state.medicines.map(m=>m.id===editingMedId?record:m);
+  else state.medicines.unshift(record);
+  save('medicines'); hideMedForm();
+  document.getElementById('medListArea').innerHTML=renderMedList();
+}
+function deleteMed(id){
+  if(!confirm('ဒီဆေးကို ဖျက်မှာ သေချာပါသလား?')) return;
+  state.medicines=state.medicines.filter(m=>m.id!==id); save('medicines');
+  document.getElementById('medListArea').innerHTML=renderMedList();
+}
+function renderMedList(){
+  if(state.medicines.length===0) return `<div class="muted ta-c" style="padding:24px 0;">ဆေးများ မရှိသေးပါ</div>`;
+  return state.medicines.map(m=>{
+    const lowShop=(m.shopStock||0)<=LOW_STOCK, lowWh=(m.warehouseStock||0)<=LOW_STOCK;
+    return `
+    <div class="card row-between">
+      <div class="min0">
+        <div class="bold small truncate">${m.name}</div>
+        <div class="muted small">Company ဝယ်စျေး ${fmt(m.companyPrice)} Ks</div>
+        <div class="small" style="color:${lowWh?'var(--indigo)':'var(--muted)'};font-weight:${lowWh?700:400};">${lowWh?'⚠ ':''}ဂိုဒေါင်ကျန်: ${m.warehouseStock||0}</div>
+        <div class="small" style="color:${lowShop?'var(--red)':'var(--muted)'};font-weight:${lowShop?700:400};">${lowShop?'⚠ ':''}ဆိုင်ကျန်: ${m.shopStock||0}</div>
+      </div>
+      <div class="row-gap" style="margin-bottom:0;">
+        <button class="icon-btn" onclick="showMedForm('${m.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteMed('${m.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ================= Debts tab (customer receivables) ================= */
+function renderDebts(){
+  const totalDue=totalCustomerDue();
+  const list=state.orders.filter(o=>(o.due||0)>0).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  return `
+    <div class="card row-between"><div class="small">စုစုပေါင်း အကြွေးလက်ကျန်</div><div class="bold amber-text">${fmt(totalDue)} Ks</div></div>
+    ${list.length===0?`<div class="muted ta-c" style="padding:24px 0;">အကြွေးလက်ကျန် မရှိပါ</div>`:list.map(o=>`
+      <div class="card">
+        <div class="row-between">
+          <div class="min0"><div class="bold small truncate">${o.buyerName||'အမည်မသိ ဖောက်သည်'}</div>
+            ${o.buyerPhone?`<div class="muted small">${o.buyerPhone}</div>`:''}
+            <div class="muted small">${fmtDT(o.ts)} ${o.seller?`· ${o.seller}`:''}</div></div>
+          <div class="ta-r"><div class="muted small">စုစုပေါင်း ${fmt(o.total)}</div><div class="bold red-text">${fmt(o.due)} Ks</div></div>
+        </div>
+        <button class="btn btn-outline-teal full small-btn" onclick="settleCustomer('${o.id}')">ငွေရှင်းမည်</button>
+      </div>`).join('')}
+  `;
+}
+function settleCustomer(id){
+  const o=state.orders.find(x=>x.id===id); if(!o) return;
+  const amtStr=prompt(`ပေးချေမည့်ငွေပမာဏ (အများဆုံး ${o.due})`, String(o.due));
+  if(amtStr===null) return;
+  const amt=Math.min(o.due, Math.max(0,parseFloat(amtStr)||0));
+  if(amt<=0) return;
+  o.paid=(o.paid||0)+amt; o.due=Math.max(0,o.total-o.paid);
+  save('orders'); toast('ငွေပေးချေမှု မှတ်တမ်းတင်ပြီးပါပြီ'); render();
+}
+
+/* ================= Backup ================= */
+function exportData(){
+  const dataStr=JSON.stringify(state,null,2);
+  const blob=new Blob([dataStr],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`pharmacy-backup-${dayKey(new Date())}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      state=Object.assign({medicines:[],orders:[],purchases:[],transfers:[],customers:[],staff:[],suppliers:[{name:'999 ဆေးဆိုင်',address:''}]},data);
+      state.suppliers = (state.suppliers||[]).map(s=> typeof s==='string' ? {name:s,address:''} : s);
+      for(const k in LS_KEYS) save(k);
+      toast('ဒေတာ Import ပြီးပါပြီ'); render();
+    }catch(err){ alert('ဖိုင် ဖတ်ရာတွင် အမှားရှိပါသည်'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ================= Tabs / main render ================= */
+function goto(t){ tab=t; render(); }
+function tabsHtml(){
+  const custDue=totalCustomerDue()>0, supDue=totalSupplierDue()>0;
+  return `
+    <button class="tabbtn ${tab==='dashboard'?'active':''}" onclick="goto('dashboard')">🏠<span>Home</span></button>
+    <button class="tabbtn ${tab==='sell'?'active':''}" onclick="goto('sell')">🛒<span>ရောင်း</span></button>
+    <button class="tabbtn ${tab==='warehouse'?'active':''}" onclick="goto('warehouse')">🚚<span>ဂိုဒေါင်</span>${supDue?'<i class="dot"></i>':''}</button>
+    <button class="tabbtn ${tab==='medicines'?'active':''}" onclick="goto('medicines')">📦<span>ဆေးများ</span></button>
+    <button class="tabbtn ${tab==='debts'?'active':''}" onclick="goto('debts')">💰<span>အကြွေး</span>${custDue?'<i class="dot"></i>':''}</button>
+  `;
+}
+function render(){
+  document.getElementById('tabs').innerHTML=tabsHtml();
+  const content = tab==='dashboard'?renderDashboard(): tab==='sell'?renderSell(): tab==='warehouse'?renderWarehouse(): tab==='medicines'?renderMedicines(): renderDebts();
+  document.getElementById('content').innerHTML = content + `<div class="footer-note">ဒေတာအားလုံးကို ဒီ browser (localStorage) ထဲမှာပဲ သိမ်းထားပါတယ်။ ဒေတာမပျောက်စေရန် — ဒီ file ကို path မပြောင်းဘဲ တစ်နေရာတည်းမှာပဲ ဖွင့်ပါ၊ Export backup ကိုလည်း ခဏခဏ ယူထားပါ။</div>`;
+}
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(sessionStorage.getItem('ph_authed')==='1'){ showApp(); }
+  else { document.getElementById('loginUser').focus(); }
+  document.getElementById('loginUser').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('loginPin').focus(); });
+  document.getElementById('loginPin').addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryLogin(); });
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
